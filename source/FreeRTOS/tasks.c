@@ -1,72 +1,3 @@
-/*
-    FreeRTOS V9.0.0 - Copyright (C) 2016 Real Time Engineers Ltd.
-    All rights reserved
-
-    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
-
-    This file is part of the FreeRTOS distribution.
-
-    FreeRTOS is free software; you can redistribute it and/or modify it under
-    the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation >>>> AND MODIFIED BY <<<< the FreeRTOS exception.
-
-    ***************************************************************************
-    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
-    >>!   distribute a combined work that includes FreeRTOS without being   !<<
-    >>!   obliged to provide the source code for proprietary components     !<<
-    >>!   outside of the FreeRTOS kernel.                                   !<<
-    ***************************************************************************
-
-    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
-    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
-    link: http://www.freertos.org/a00114.html
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS provides completely free yet professionally developed,    *
-     *    robust, strictly quality controlled, supported, and cross          *
-     *    platform software that is more than just the market leader, it     *
-     *    is the industry's de facto standard.                               *
-     *                                                                       *
-     *    Help yourself get started quickly while simultaneously helping     *
-     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
-     *    tutorial book, reference manual, or both:                          *
-     *    http://www.FreeRTOS.org/Documentation                              *
-     *                                                                       *
-    ***************************************************************************
-
-    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
-    the FAQ page "My application does not run, what could be wrong?".  Have you
-    defined configASSERT()?
-
-    http://www.FreeRTOS.org/support - In return for receiving this top quality
-    embedded software for free we request you assist our global community by
-    participating in the support forum.
-
-    http://www.FreeRTOS.org/training - Investing in training allows your team to
-    be as productive as possible as early as possible.  Now you can receive
-    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
-    Ltd, and the world's leading authority on the world's leading RTOS.
-
-    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
-    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
-    compatible FAT file system, and our tiny thread aware UDP/IP stack.
-
-    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
-    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
-
-    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
-    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
-    licenses offer ticketed support, indemnification and commercial middleware.
-
-    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
-    engineered and independently SIL3 certified version for use in safety and
-    mission critical applications that require provable dependability.
-
-    1 tab == 4 spaces!
-*/
-
 /* Standard includes. */
 #include <stdlib.h>
 #include <string.h>
@@ -173,7 +104,7 @@ a statically allocated stack and a dynamically allocated TCB. */
 
 	#define taskSELECT_HIGHEST_PRIORITY_TASK()															\
 	{																									\
-	UBaseType_t uxTopPriority = uxTopReadyPriority;														\
+	    UBaseType_t uxTopPriority = uxTopReadyPriority;													\
 																										\
 		/* Find the highest priority queue that contains ready tasks. */								\
 		while( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxTopPriority ] ) ) )							\
@@ -672,29 +603,25 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 #if( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
-
-	BaseType_t xTaskCreate(	TaskFunction_t pxTaskCode,
-							const char * const pcName,
-							const uint16_t usStackDepth,
-							void * const pvParameters,
-							UBaseType_t uxPriority,
-							TaskHandle_t * const pxCreatedTask ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-	{
+BaseType_t xTaskCreate(TaskFunction_t pxTaskCode, const char * const pcName, const uint16_t usStackDepth, void * const pvParameters, UBaseType_t uxPriority, TaskHandle_t * const pxCreatedTask ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+{
 	TCB_t *pxNewTCB;
 	BaseType_t xReturn;
+
+    printf("%s-%d-%s\r\n", __FILE__, __LINE__, pcName);
 
 		/* If the stack grows down then allocate the stack then the TCB so the stack
 		does not grow into the TCB.  Likewise if the stack grows up then allocate
 		the TCB then the stack. */
-		#if( portSTACK_GROWTH > 0 )
-		{
-			/* Allocate space for the TCB.  Where the memory comes from depends on
-			the implementation of the port malloc function and whether or not static
-			allocation is being used. */
-			pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) );
+    #if( portSTACK_GROWTH > 0 )
+    {
+        /* Allocate space for the TCB.  Where the memory comes from depends on
+           the implementation of the port malloc function and whether or not static
+	       allocation is being used. */
+        pxNewTCB = ( TCB_t * ) pvPortMalloc( sizeof( TCB_t ) );
 
-			if( pxNewTCB != NULL )
-			{
+        if( pxNewTCB != NULL )
+        {
 				/* Allocate space for the stack used by the task being created.
 				The base of the stack memory stored in the TCB so the task can
 				be deleted later if required. */
@@ -706,14 +633,14 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 					vPortFree( pxNewTCB );
 					pxNewTCB = NULL;
 				}
-			}
-		}
-		#else /* portSTACK_GROWTH */
-		{
+        }
+    }
+    #else /* portSTACK_GROWTH */
+    {
 		StackType_t *pxStack;
 
-			/* Allocate space for the stack used by the task being created. */
-			pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
+        /* Allocate space for the stack used by the task being created. */
+        pxStack = ( StackType_t * ) pvPortMalloc( ( ( ( size_t ) usStackDepth ) * sizeof( StackType_t ) ) ); /*lint !e961 MISRA exception as the casts are only redundant for some ports. */
 
 			if( pxStack != NULL )
 			{
@@ -736,30 +663,30 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB ) PRIVILEGED_FUNCTION;
 			{
 				pxNewTCB = NULL;
 			}
-		}
-		#endif /* portSTACK_GROWTH */
+    }
+    #endif /* portSTACK_GROWTH */
 
-		if( pxNewTCB != NULL )
+    if (pxNewTCB != NULL)
+	{
+        #if( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 )
 		{
-			#if( tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0 )
-			{
-				/* Tasks can be created statically or dynamically, so note this
-				task was created dynamically in case it is later deleted. */
-				pxNewTCB->ucStaticallyAllocated = tskDYNAMICALLY_ALLOCATED_STACK_AND_TCB;
-			}
-			#endif /* configSUPPORT_STATIC_ALLOCATION */
-
-			prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
-			prvAddNewTaskToReadyList( pxNewTCB );
-			xReturn = pdPASS;
+			/* Tasks can be created statically or dynamically, so note this
+			task was created dynamically in case it is later deleted. */
+			pxNewTCB->ucStaticallyAllocated = tskDYNAMICALLY_ALLOCATED_STACK_AND_TCB;
 		}
-		else
-		{
-			xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
-		}
+		#endif /* configSUPPORT_STATIC_ALLOCATION */
 
-		return xReturn;
-	}
+		prvInitialiseNewTask    (pxTaskCode, pcName, (uint32_t)usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
+		prvAddNewTaskToReadyList(pxNewTCB);
+		xReturn = pdPASS;
+    }
+    else
+    {
+        xReturn = errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY;
+    }
+
+    return xReturn;
+}
 
 #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
 /*-----------------------------------------------------------*/
@@ -1823,9 +1750,9 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 #endif /* ( ( INCLUDE_xTaskResumeFromISR == 1 ) && ( INCLUDE_vTaskSuspend == 1 ) ) */
 /*-----------------------------------------------------------*/
 
-void vTaskStartScheduler( void )
+void vTaskStartScheduler(void)
 {
-BaseType_t xReturn;
+    BaseType_t xReturn;
 
 	/* Add the idle task at the lowest priority. */
 	#if( configSUPPORT_STATIC_ALLOCATION == 1 )
@@ -1845,7 +1772,7 @@ BaseType_t xReturn;
 												pxIdleTaskStackBuffer,
 												pxIdleTaskTCBBuffer ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
 
-		if( xIdleTaskHandle != NULL )
+		if (xIdleTaskHandle != NULL)
 		{
 			xReturn = pdPASS;
 		}
@@ -1857,17 +1784,14 @@ BaseType_t xReturn;
 	#else
 	{
 		/* The Idle task is being created using dynamically allocated RAM. */
-		xReturn = xTaskCreate(	prvIdleTask,
-								"IDLE", configMINIMAL_STACK_SIZE,
-								( void * ) NULL,
-								( tskIDLE_PRIORITY | portPRIVILEGE_BIT ),
-								&xIdleTaskHandle ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
+        // 在系统中检查，流程走当前的分支
+		xReturn = xTaskCreate(prvIdleTask, "IDLE", configMINIMAL_STACK_SIZE, (void *)NULL, (tskIDLE_PRIORITY | portPRIVILEGE_BIT), &xIdleTaskHandle); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
 	}
 	#endif /* configSUPPORT_STATIC_ALLOCATION */
 
-	#if ( configUSE_TIMERS == 1 )
+	#if (configUSE_TIMERS == 1)
 	{
-		if( xReturn == pdPASS )
+		if (xReturn == pdPASS)
 		{
 			xReturn = xTimerCreateTimerTask();
 		}
@@ -1878,7 +1802,7 @@ BaseType_t xReturn;
 	}
 	#endif /* configUSE_TIMERS */
 
-	if( xReturn == pdPASS )
+	if (xReturn == pdPASS)
 	{
 		/* Interrupts are turned off here, to ensure a tick does not occur
 		before or during the call to xPortStartScheduler().  The stacks of
@@ -1896,8 +1820,8 @@ BaseType_t xReturn;
 		#endif /* configUSE_NEWLIB_REENTRANT */
 
 		xNextTaskUnblockTime = portMAX_DELAY;
-		xSchedulerRunning = pdTRUE;
-		xTickCount = ( TickType_t ) 0U;
+		xSchedulerRunning    = pdTRUE;
+		xTickCount           = (TickType_t) 0U;
 
 		/* If configGENERATE_RUN_TIME_STATS is defined then the following
 		macro must be defined to configure the timer/counter used to generate
@@ -1906,7 +1830,7 @@ BaseType_t xReturn;
 
 		/* Setting up the timer tick is hardware specific and thus in the
 		portable interface. */
-		if( xPortStartScheduler() != pdFALSE )
+		if (xPortStartScheduler() != pdFALSE)
 		{
 			/* Should not reach here as if the scheduler is running the
 			function will not return. */
@@ -1921,12 +1845,11 @@ BaseType_t xReturn;
 		/* This line will only be reached if the kernel could not be started,
 		because there was not enough FreeRTOS heap to create the idle task
 		or the timer task. */
-		configASSERT( xReturn != errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY );
+		configASSERT(xReturn != errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY);
 	}
 
-	/* Prevent compiler warnings if INCLUDE_xTaskGetIdleTaskHandle is set to 0,
-	meaning xIdleTaskHandle is not used anywhere else. */
-	( void ) xIdleTaskHandle;
+	/* Prevent compiler warnings if INCLUDE_xTaskGetIdleTaskHandle is set to 0, meaning xIdleTaskHandle is not used anywhere else. */
+	(void) xIdleTaskHandle;
 }
 /*-----------------------------------------------------------*/
 
@@ -4570,8 +4493,8 @@ TickType_t uxReturn;
 
 #if( configUSE_TASK_NOTIFICATIONS == 1 )
 
-	void vTaskNotifyGiveFromISR( TaskHandle_t xTaskToNotify, BaseType_t *pxHigherPriorityTaskWoken )
-	{
+void vTaskNotifyGiveFromISR( TaskHandle_t xTaskToNotify, BaseType_t *pxHigherPriorityTaskWoken )
+{
 	TCB_t * pxTCB;
 	uint8_t ucOriginalNotifyState;
 	UBaseType_t uxSavedInterruptStatus;
@@ -4800,8 +4723,6 @@ const TickType_t xConstTickCount = xTickCount;
 	#endif /* INCLUDE_vTaskSuspend */
 }
 
-
 #ifdef FREERTOS_MODULE_TEST
 	#include "tasks_test_access_functions.h"
 #endif
-

@@ -258,7 +258,7 @@ static void prvInitialiseNewTimer(	const char * const pcTimerName,
 
 BaseType_t xTimerCreateTimerTask( void )
 {
-BaseType_t xReturn = pdFAIL;
+    BaseType_t xReturn = pdFAIL;
 
 	/* This function is called when the scheduler is started if
 	configUSE_TIMERS is set to 1.  Check that the infrastructure used by the
@@ -290,8 +290,9 @@ BaseType_t xReturn = pdFAIL;
 		}
 		#else
 		{
+            /// 实际运行，分支走到这里
 			xReturn = xTaskCreate(	prvTimerTask,
-									"Tmr Svc",
+									"Tmr Svc1",
 									configTIMER_TASK_STACK_DEPTH,
 									NULL,
 									( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,

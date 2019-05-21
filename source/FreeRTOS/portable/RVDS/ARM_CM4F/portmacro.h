@@ -219,7 +219,7 @@ static portFORCE_INLINE void vPortSetBASEPRI( uint32_t ulBASEPRI )
 
 static portFORCE_INLINE void vPortRaiseBASEPRI( void )
 {
-uint32_t ulNewBASEPRI = configMAX_SYSCALL_INTERRUPT_PRIORITY;
+    uint32_t ulNewBASEPRI = configMAX_SYSCALL_INTERRUPT_PRIORITY;
 
 	__asm
 	{
