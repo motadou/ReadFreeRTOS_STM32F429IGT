@@ -35,7 +35,7 @@
 //     SYSCLK=360/2=180Mhz
 //     Fusb=360/8=45Mhz
 //返回值:0,成功;1,失败
-void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq)
+void Stm32_Clock_Init(u32 plln, u32 pllm, u32 pllp,u32 pllq)
 {
     HAL_StatusTypeDef ret = HAL_OK;
     RCC_OscInitTypeDef RCC_OscInitStructure; 
