@@ -1148,45 +1148,45 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 
 #if ( INCLUDE_vTaskDelay == 1 )
 
-	void vTaskDelay( const TickType_t xTicksToDelay )
+void vTaskDelay(const TickType_t xTicksToDelay)
+{
+    BaseType_t xAlreadyYielded = pdFALSE;
+
+	/* A delay time of zero just forces a reschedule. */
+	if (xTicksToDelay > ( TickType_t ) 0U)
 	{
-	BaseType_t xAlreadyYielded = pdFALSE;
-
-		/* A delay time of zero just forces a reschedule. */
-		if( xTicksToDelay > ( TickType_t ) 0U )
+		configASSERT( uxSchedulerSuspended == 0 );
+		vTaskSuspendAll();
 		{
-			configASSERT( uxSchedulerSuspended == 0 );
-			vTaskSuspendAll();
-			{
-				traceTASK_DELAY();
+			traceTASK_DELAY();
 
-				/* A task that is removed from the event list while the
-				scheduler is suspended will not get placed in the ready
-				list or removed from the blocked list until the scheduler
-				is resumed.
+			/* A task that is removed from the event list while the
+			scheduler is suspended will not get placed in the ready
+			list or removed from the blocked list until the scheduler
+			is resumed.
 
-				This task cannot be in an event list as it is the currently
-				executing task. */
-				prvAddCurrentTaskToDelayedList( xTicksToDelay, pdFALSE );
-			}
-			xAlreadyYielded = xTaskResumeAll();
-		}
-		else
-		{
-			mtCOVERAGE_TEST_MARKER();
+			This task cannot be in an event list as it is the currently
+			executing task. */
+			prvAddCurrentTaskToDelayedList( xTicksToDelay, pdFALSE );
 		}
 
-		/* Force a reschedule if xTaskResumeAll has not already done so, we may
-		have put ourselves to sleep. */
-		if( xAlreadyYielded == pdFALSE )
-		{
-			portYIELD_WITHIN_API();
-		}
-		else
-		{
-			mtCOVERAGE_TEST_MARKER();
-		}
+		xAlreadyYielded = xTaskResumeAll();
 	}
+	else
+	{
+		mtCOVERAGE_TEST_MARKER();
+	}
+
+	/* Force a reschedule if xTaskResumeAll has not already done so, we may	have put ourselves to sleep. */
+	if (xAlreadyYielded == pdFALSE)
+	{
+		portYIELD_WITHIN_API();
+	}
+	else
+	{
+		mtCOVERAGE_TEST_MARKER();
+	}
+}
 
 #endif /* INCLUDE_vTaskDelay */
 /*-----------------------------------------------------------*/
@@ -1939,8 +1939,8 @@ void vTaskSuspendAll( void )
 
 BaseType_t xTaskResumeAll( void )
 {
-TCB_t *pxTCB = NULL;
-BaseType_t xAlreadyYielded = pdFALSE;
+    TCB_t *pxTCB = NULL;
+    BaseType_t xAlreadyYielded = pdFALSE;
 
 	/* If uxSchedulerSuspended is zero then this function does not match a
 	previous call to vTaskSuspendAll(). */
@@ -1955,22 +1955,20 @@ BaseType_t xAlreadyYielded = pdFALSE;
 	{
 		--uxSchedulerSuspended;
 
-		if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+		if (uxSchedulerSuspended == ( UBaseType_t )pdFALSE)
 		{
-			if( uxCurrentNumberOfTasks > ( UBaseType_t ) 0U )
+			if (uxCurrentNumberOfTasks > ( UBaseType_t ) 0U)
 			{
-				/* Move any readied tasks from the pending list into the
-				appropriate ready list. */
-				while( listLIST_IS_EMPTY( &xPendingReadyList ) == pdFALSE )
+				/* Move any readied tasks from the pending list into the appropriate ready list. */
+				while (listLIST_IS_EMPTY( &xPendingReadyList ) == pdFALSE)
 				{
 					pxTCB = ( TCB_t * ) listGET_OWNER_OF_HEAD_ENTRY( ( &xPendingReadyList ) );
 					( void ) uxListRemove( &( pxTCB->xEventListItem ) );
 					( void ) uxListRemove( &( pxTCB->xStateListItem ) );
 					prvAddTaskToReadyList( pxTCB );
 
-					/* If the moved task has a priority higher than the current
-					task then a yield must be performed. */
-					if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+					/* If the moved task has a priority higher than the current	task then a yield must be performed. */
+					if (pxTCB->uxPriority >= pxCurrentTCB->uxPriority)
 					{
 						xYieldPending = pdTRUE;
 					}
@@ -1980,7 +1978,7 @@ BaseType_t xAlreadyYielded = pdFALSE;
 					}
 				}
 
-				if( pxTCB != NULL )
+				if (pxTCB != NULL)
 				{
 					/* A task was unblocked while the scheduler was suspended,
 					which may have prevented the next unblock time from being
@@ -2421,15 +2419,15 @@ implementations require configUSE_TICKLESS_IDLE to be set to a value other than
 
 BaseType_t xTaskIncrementTick( void )
 {
-TCB_t * pxTCB;
-TickType_t xItemValue;
-BaseType_t xSwitchRequired = pdFALSE;
+    TCB_t      * pxTCB;
+    TickType_t   xItemValue;
+    BaseType_t   xSwitchRequired = pdFALSE;
 
 	/* Called by the portable layer each time a tick interrupt occurs.
 	Increments the tick then checks to see if the new tick value will cause any
 	tasks to be unblocked. */
 	traceTASK_INCREMENT_TICK( xTickCount );
-	if( uxSchedulerSuspended == ( UBaseType_t ) pdFALSE )
+	if (uxSchedulerSuspended == (UBaseType_t) pdFALSE)
 	{
 		/* Minor optimisation.  The tick count cannot change in this
 		block. */
@@ -2504,8 +2502,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 						mtCOVERAGE_TEST_MARKER();
 					}
 
-					/* Place the unblocked task into the appropriate ready
-					list. */
+					/* Place the unblocked task into the appropriate ready list. */
 					prvAddTaskToReadyList( pxTCB );
 
 					/* A task being unblocked cannot cause an immediate
@@ -2535,7 +2532,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 		writer has not explicitly turned time slicing off. */
 		#if ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) )
 		{
-			if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCB->uxPriority ] ) ) > ( UBaseType_t ) 1 )
+			if (listCURRENT_LIST_LENGTH(&(pxReadyTasksLists[pxCurrentTCB->uxPriority])) > (UBaseType_t)1)
 			{
 				xSwitchRequired = pdTRUE;
 			}
@@ -2546,7 +2543,7 @@ BaseType_t xSwitchRequired = pdFALSE;
 		}
 		#endif /* ( ( configUSE_PREEMPTION == 1 ) && ( configUSE_TIME_SLICING == 1 ) ) */
 
-		#if ( configUSE_TICK_HOOK == 1 )
+		#if (configUSE_TICK_HOOK == 1)
 		{
 			/* Guard against the tick hook being called when the pended tick
 			count is being unwound (when the scheduler is being unlocked). */
@@ -4614,10 +4611,10 @@ void vTaskNotifyGiveFromISR( TaskHandle_t xTaskToNotify, BaseType_t *pxHigherPri
 
 static void prvAddCurrentTaskToDelayedList( TickType_t xTicksToWait, const BaseType_t xCanBlockIndefinitely )
 {
-TickType_t xTimeToWake;
-const TickType_t xConstTickCount = xTickCount;
+    TickType_t xTimeToWake;
+    const TickType_t xConstTickCount = xTickCount;
 
-	#if( INCLUDE_xTaskAbortDelay == 1 )
+	#if (INCLUDE_xTaskAbortDelay == 1)
 	{
 		/* About to enter a delayed list, so ensure the ucDelayAborted flag is
 		reset to pdFALSE so it can be detected as having been set to pdTRUE
@@ -4626,9 +4623,8 @@ const TickType_t xConstTickCount = xTickCount;
 	}
 	#endif
 
-	/* Remove the task from the ready list before adding it to the blocked list
-	as the same list item is used for both lists. */
-	if( uxListRemove( &( pxCurrentTCB->xStateListItem ) ) == ( UBaseType_t ) 0 )
+	/* Remove the task from the ready list before adding it to the blocked list as the same list item is used for both lists. */
+	if (uxListRemove(&(pxCurrentTCB->xStateListItem)) == (UBaseType_t) 0)
 	{
 		/* The current task must be in a ready list, so there is no need to
 		check, and the port reset macro can be called directly. */
@@ -4639,14 +4635,14 @@ const TickType_t xConstTickCount = xTickCount;
 		mtCOVERAGE_TEST_MARKER();
 	}
 
-	#if ( INCLUDE_vTaskSuspend == 1 )
+	#if (INCLUDE_vTaskSuspend == 1)
 	{
-		if( ( xTicksToWait == portMAX_DELAY ) && ( xCanBlockIndefinitely != pdFALSE ) )
+		if ((xTicksToWait == portMAX_DELAY) && (xCanBlockIndefinitely != pdFALSE))
 		{
 			/* Add the task to the suspended task list instead of a delayed task
 			list to ensure it is not woken by a timing event.  It will block
 			indefinitely. */
-			vListInsertEnd( &xSuspendedTaskList, &( pxCurrentTCB->xStateListItem ) );
+			vListInsertEnd(&xSuspendedTaskList, &(pxCurrentTCB->xStateListItem));
 		}
 		else
 		{
@@ -4658,17 +4654,15 @@ const TickType_t xConstTickCount = xTickCount;
 			/* The list item will be inserted in wake time order. */
 			listSET_LIST_ITEM_VALUE( &( pxCurrentTCB->xStateListItem ), xTimeToWake );
 
-			if( xTimeToWake < xConstTickCount )
+			if (xTimeToWake < xConstTickCount)
 			{
-				/* Wake time has overflowed.  Place this item in the overflow
-				list. */
-				vListInsert( pxOverflowDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
+				/* Wake time has overflowed. Place this item in the overflow list. */
+				vListInsert(pxOverflowDelayedTaskList, &(pxCurrentTCB->xStateListItem));
 			}
 			else
 			{
-				/* The wake time has not overflowed, so the current block list
-				is used. */
-				vListInsert( pxDelayedTaskList, &( pxCurrentTCB->xStateListItem ) );
+				/* The wake time has not overflowed, so the current block list is used. */
+				vListInsert(pxDelayedTaskList, &(pxCurrentTCB->xStateListItem));
 
 				/* If the task entering the blocked state was placed at the
 				head of the list of blocked tasks then xNextTaskUnblockTime

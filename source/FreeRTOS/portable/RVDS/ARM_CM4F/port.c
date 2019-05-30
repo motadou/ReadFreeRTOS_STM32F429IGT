@@ -369,7 +369,7 @@ void vPortEnterCritical( void )
 	assert function also uses a critical section. */
 	if (uxCriticalNesting == 1)
 	{
-		configASSERT( ( portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK ) == 0 );
+		configASSERT((portNVIC_INT_CTRL_REG & portVECTACTIVE_MASK) == 0);
 	}
 }
 /*-----------------------------------------------------------*/
@@ -457,14 +457,15 @@ void xPortSysTickHandler( void )
 	vPortRaiseBASEPRI();
 	{
 		/* Increment the RTOS tick. */
-		if( xTaskIncrementTick() != pdFALSE )
+		if (xTaskIncrementTick() != pdFALSE)
 		{
 			/* A context switch is required.  Context switching is performed in
 			the PendSV interrupt.  Pend the PendSV interrupt. */
 			portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
 		}
 	}
-	vPortClearBASEPRIFromISR();
+	
+    vPortClearBASEPRIFromISR();
 }
 /*-----------------------------------------------------------*/
 

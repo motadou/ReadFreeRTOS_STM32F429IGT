@@ -28,8 +28,8 @@ static u32 fac_us=0;							//us延时倍乘数
     static u16 fac_ms=0;				        //ms延时倍乘数,在os下,代表每个节拍的ms数
 #endif
 
- 
 extern void xPortSysTickHandler(void);
+
 //systick中断服务函数,使用OS时用到
 void SysTick_Handler(void)
 {  
@@ -47,7 +47,7 @@ void SysTick_Handler(void)
 void delay_init(u8 SYSCLK)
 {
 	u32 reload;
-    HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);//SysTick频率为HCLK
+    HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);    //SysTick频率为HCLK
 	fac_us=SYSCLK;						    //不论是否使用OS,fac_us都需要使用
 	reload=SYSCLK;					        //每秒钟的计数次数 单位为K	   
 	reload*=1000000/configTICK_RATE_HZ;		//根据configTICK_RATE_HZ设定溢出时间
@@ -86,7 +86,7 @@ void delay_us(u32 nus)
 //nms:0~65535
 void delay_ms(u32 nms)
 {	
-	if(xTaskGetSchedulerState()!=taskSCHEDULER_NOT_STARTED)//系统已经运行
+	if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) //系统已经运行
 	{		
 		if(nms>=fac_ms)						//延时的时间大于OS的最少时间周期 
 		{ 
@@ -104,41 +104,3 @@ void delay_xms(u32 nms)
 	u32 i;
 	for(i=0;i<nms;i++) delay_us(1000);
 }
-
-
-			 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
